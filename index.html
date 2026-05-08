@@ -1,0 +1,707 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Sistema Q&A - La Manada Feliz</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: "Inter", "Segoe UI", sans-serif;
+        background: linear-gradient(
+          135deg,
+          #f97316 0%,
+          #fb923c 50%,
+          #fbbf24 100%
+        );
+        min-height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 20px;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .main-layout {
+        display: flex;
+        gap: 20px;
+        max-width: 1400px;
+        width: 100%;
+        position: relative;
+        z-index: 1;
+      }
+
+      .sidebar {
+        background: rgba(255, 255, 255, 0.97);
+        backdrop-filter: blur(10px);
+        border-radius: 24px;
+        box-shadow: 0 25px 80px rgba(0, 0, 0, 0.25);
+        width: 320px;
+        min-width: 320px;
+        padding: 30px;
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        max-height: 90vh;
+        overflow-y: auto;
+      }
+
+      .sidebar h2 {
+        background: linear-gradient(
+          135deg,
+          #f97316 0%,
+          #fb923c 50%,
+          #fbbf24 100%
+        );
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        font-size: 20px;
+        font-weight: 700;
+        margin-bottom: 20px;
+        text-align: left;
+      }
+
+      .history-item {
+        background: #f8fafc;
+        border: 2px solid #e2e8f0;
+        border-radius: 12px;
+        padding: 12px 16px;
+        margin-bottom: 10px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-align: left;
+        position: relative;
+      }
+
+      .history-item:hover {
+        background: white;
+        border-color: #fb923c;
+        transform: translateX(5px);
+      }
+
+      .history-item:hover .delete-icon {
+        opacity: 1;
+      }
+
+      .history-item.active {
+        background: linear-gradient(135deg, #f97316 0%, #fb923c 100%);
+        color: white;
+        border-color: #f97316;
+      }
+
+      .history-item-title {
+        font-weight: 600;
+        font-size: 14px;
+        margin-bottom: 4px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        padding-right: 30px;
+      }
+
+      .history-item-date {
+        font-size: 12px;
+        opacity: 0.7;
+      }
+
+      .delete-icon {
+        position: absolute;
+        top: 50%;
+        right: 12px;
+        transform: translateY(-50%);
+        background: #ef4444;
+        color: white;
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        opacity: 0;
+        transition: all 0.2s ease;
+        font-size: 14px;
+        border: none;
+      }
+
+      .delete-icon:hover {
+        background: #dc2626;
+        transform: translateY(-50%) scale(1.1);
+      }
+
+      .history-item.active .delete-icon {
+        background: rgba(255, 255, 255, 0.3);
+      }
+
+      .history-item.active .delete-icon:hover {
+        background: rgba(255, 255, 255, 0.5);
+      }
+
+      .clear-all-btn {
+        width: 100%;
+        background: #64748b;
+        color: white;
+        border: none;
+        padding: 12px 20px;
+        border-radius: 12px;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        margin-top: 15px;
+      }
+
+      .clear-all-btn:hover {
+        background: #475569;
+        transform: translateY(-2px);
+      }
+
+      .new-chat-btn {
+        width: 100%;
+        background: linear-gradient(135deg, #f97316 0%, #fb923c 100%);
+        color: white;
+        border: none;
+        padding: 14px 20px;
+        border-radius: 12px;
+        font-size: 15px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        margin-bottom: 20px;
+        box-shadow: 0 4px 15px rgba(249, 115, 22, 0.4);
+      }
+
+      .new-chat-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(249, 115, 22, 0.5);
+      }
+
+      .container {
+        background: rgba(255, 255, 255, 0.97);
+        backdrop-filter: blur(10px);
+        border-radius: 24px;
+        box-shadow: 0 25px 80px rgba(0, 0, 0, 0.25);
+        flex: 1;
+        padding: 50px;
+        position: relative;
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        text-align: center;
+      }
+
+      .logo-left {
+        position: absolute;
+        top: 20px;
+        left: 25px;
+        width: 140px;
+        height: auto;
+      }
+
+      .logo-right {
+        position: absolute;
+        top: 20px;
+        right: 25px;
+        width: 140px;
+        height: auto;
+      }
+
+      h1 {
+        background: linear-gradient(
+          135deg,
+          #f97316 0%,
+          #fb923c 50%,
+          #fbbf24 100%
+        );
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 12px;
+        font-size: 36px;
+        font-weight: 800;
+        letter-spacing: -0.5px;
+      }
+
+      .subtitle {
+        color: #64748b;
+        margin-bottom: 35px;
+        font-size: 16px;
+        font-weight: 500;
+      }
+
+      .chat-box {
+        height: 520px;
+        overflow-y: auto;
+        border: 2px solid #e2e8f0;
+        border-radius: 16px;
+        padding: 25px;
+        margin-bottom: 25px;
+        background: linear-gradient(to bottom, #f8fafc 0%, #ffffff 100%);
+        box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.05);
+        text-align: left;
+      }
+
+      .message {
+        margin-bottom: 18px;
+        padding: 16px 20px;
+        border-radius: 16px;
+        max-width: 85%;
+        animation: slideIn 0.4s ease;
+        line-height: 1.6;
+        font-size: 15px;
+      }
+
+      @keyframes slideIn {
+        from {
+          opacity: 0;
+          transform: translateY(15px) scale(0.95);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0) scale(1);
+        }
+      }
+
+      .user-message {
+        background: linear-gradient(135deg, #f97316 0%, #fb923c 100%);
+        color: white;
+        margin-left: auto;
+        text-align: right;
+        box-shadow: 0 4px 15px rgba(249, 115, 22, 0.3);
+        display: flex;
+        align-items: flex-start;
+        gap: 12px;
+        flex-direction: row-reverse;
+      }
+
+      .user-message::before {
+        content: "";
+        display: inline-block;
+        width: 40px;
+        height: 40px;
+        min-width: 40px;
+        background-image: url("data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgdmlld0JveD0iMCAwIDIwMCAyMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxjaXJjbGUgY3g9IjEwMCIgY3k9IjYwIiByPSI0MCIgZmlsbD0iIzFmMjkzNyIvPgo8cGF0aCBkPSJNNDAgMTQwQzQwIDEwNi44NjMgNjYuODYyOSA4MCAxMDAgODBDMTMzLjEzNyA4MCAxNjAgMTA2Ljg2MyAxNjAgMTQwVjIwMEg0MFYxNDBaIiBmaWxsPSIjMWYyOTM3Ii8+Cjwvc3ZnPg==");
+        background-size: cover;
+        background-position: center;
+        border-radius: 50%;
+        flex-shrink: 0;
+        background-color: white;
+      }
+
+      .ai-message {
+        background: white;
+        border: 2px solid #e2e8f0;
+        color: #1e293b;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+        white-space: pre-wrap;
+        display: flex;
+        align-items: flex-start;
+        gap: 12px;
+      }
+
+      .ai-message::before {
+        content: "";
+        display: inline-block;
+        width: 40px;
+        height: 40px;
+        min-width: 40px;
+        background-image: url("data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgdmlld0JveD0iMCAwIDIwMCAyMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxjaXJjbGUgY3g9IjEwMCIgY3k9IjEwMCIgcj0iMTAwIiBmaWxsPSIjMjY0NjUzIi8+CjxyZWN0IHg9IjUwIiB5PSI2MCIgd2lkdGg9IjEwMCIgaGVpZ2h0PSI4MCIgcng9IjQwIiBmaWxsPSJ3aGl0ZSIvPgo8Y2lyY2xlIGN4PSI3NSIgY3k9IjkwIiByPSIxNSIgZmlsbD0iIzRhZGE1ZSIvPgo8Y2lyY2xlIGN4PSIxMjUiIGN5PSI5MCIgcj0iMTUiIGZpbGw9IiM0YWRhNWUiLz4KPHJlY3QgeD0iNzAiIHk9IjEyMCIgd2lkdGg9IjYwIiBoZWlnaHQ9IjgiIHJ4PSI0IiBmaWxsPSIjZTJlOGYwIi8+CjxjaXJjbGUgY3g9IjEwMCIgY3k9IjMwIiByPSI4IiBmaWxsPSIjZWY0NDQ0Ii8+CjxyZWN0IHg9Ijk2IiB5PSIzMCIgd2lkdGg9IjgiIGhlaWdodD0iMzAiIGZpbGw9IiNlMmU4ZjAiLz4KPC9zdmc+");
+        background-size: cover;
+        background-position: center;
+        border-radius: 50%;
+        flex-shrink: 0;
+      }
+
+      .input-area {
+        display: flex;
+        gap: 12px;
+        align-items: center;
+      }
+
+      #questionInput {
+        flex: 1;
+        padding: 16px 20px;
+        border: 2px solid #e2e8f0;
+        border-radius: 12px;
+        font-size: 15px;
+        transition: all 0.3s ease;
+        background: white;
+        color: #1e293b;
+      }
+
+      #questionInput:focus {
+        outline: none;
+        border-color: #fb923c;
+        box-shadow: 0 0 0 4px rgba(251, 146, 60, 0.1);
+      }
+
+      button {
+        background: linear-gradient(135deg, #f97316 0%, #fb923c 100%);
+        color: white;
+        border: none;
+        padding: 16px 32px;
+        border-radius: 12px;
+        font-size: 16px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(249, 115, 22, 0.4);
+      }
+
+      button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(249, 115, 22, 0.5);
+      }
+
+      button:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+        transform: none;
+      }
+
+      .loading {
+        display: none;
+        text-align: center;
+        color: #fb923c;
+        margin: 15px 0;
+        font-style: italic;
+        font-weight: 500;
+        animation: pulse 1.5s ease-in-out infinite;
+      }
+
+      @keyframes pulse {
+        0%,
+        100% {
+          opacity: 0.6;
+        }
+        50% {
+          opacity: 1;
+        }
+      }
+
+      .config-section {
+        background: #f8fafc;
+        border: 2px solid #e2e8f0;
+        border-radius: 12px;
+        padding: 20px;
+        margin-bottom: 20px;
+        text-align: left;
+      }
+
+      .config-section h3 {
+        color: #1e293b;
+        margin-bottom: 15px;
+        font-size: 18px;
+      }
+
+      .api-input {
+        width: 100%;
+        padding: 12px 16px;
+        border: 2px solid #e2e8f0;
+        border-radius: 8px;
+        font-size: 14px;
+        font-family: monospace;
+      }
+
+      .api-input:focus {
+        outline: none;
+        border-color: #fb923c;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="main-layout">
+      <!-- Sidebar de Historial -->
+      <div class="sidebar">
+        <h2>📋 Historial</h2>
+        <button class="new-chat-btn" onclick="startNewChat()">
+          + Nueva Conversación
+        </button>
+        <div id="historyList"></div>
+        <button class="clear-all-btn" onclick="clearAllHistory()">
+          🗑️ Borrar Todo el Historial
+        </button>
+      </div>
+
+      <!-- Contenedor Principal -->
+      <div class="container">
+        <img
+          src="guardianes-logo.png"
+          alt="Logo Guardianes La Manada Feliz"
+          class="logo-left"
+        />
+        <img
+          src="logomanada.png"
+          alt="Logo La Manada Feliz"
+          class="logo-right"
+        />
+        <h1>Sistema Q&A - La Manada Feliz</h1>
+        <p class="subtitle">
+          Haz preguntas sobre el Manual Organizacional con IA
+        </p>
+
+        <div class="chat-box" id="chatBox">
+          <div class="message ai-message">
+            ¡Hola! Estoy listo para responder tus preguntas sobre el Manual
+            Organizacional de La Manada Feliz usando inteligencia artificial.
+            ¿Qué te gustaría saber?
+          </div>
+        </div>
+
+        <div class="loading" id="loading">Generando respuesta con IA...</div>
+
+        <div class="input-area">
+          <input
+            type="text"
+            id="questionInput"
+            placeholder="Escribe tu pregunta aquí..."
+            onkeypress="handleKeyPress(event)"
+          />
+          <button onclick="askQuestion()" id="sendButton">Enviar</button>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      const API_KEY = "AIzaSyDTqoHKEQoUT3RmBPemIc6bwq9J5Aqo01w";
+      const GEMINI_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=" + API_KEY;
+
+      let conversations = [];
+      let currentConversationId = null;
+
+      // LocalStorage
+      function saveConversations() {
+        localStorage.setItem("manada_conversations", JSON.stringify(conversations));
+      }
+
+      function loadConversations() {
+        try {
+          const saved = localStorage.getItem("manada_conversations");
+          if (saved) conversations = JSON.parse(saved);
+        } catch (e) {
+          conversations = [];
+        }
+        if (conversations.length === 0) {
+          startNewChat();
+        } else {
+          currentConversationId = conversations[0].id;
+          renderHistory();
+          loadConversation(currentConversationId);
+        }
+      }
+
+      function saveMessage(role, content) {
+        const conv = conversations.find(function(c) { return c.id === currentConversationId; });
+        if (conv) {
+          conv.messages.push({ role: role, content: content });
+          saveConversations();
+        }
+      }
+
+      // Conversaciones
+      function startNewChat() {
+        var newConv = {
+          id: Date.now(),
+          title: "Nueva conversación",
+          date: new Date().toLocaleDateString("es-MX"),
+          messages: []
+        };
+        conversations.unshift(newConv);
+        currentConversationId = newConv.id;
+        saveConversations();
+        renderHistory();
+        clearChatBox();
+        appendMessage("ai", "¡Hola! Estoy listo para responder tus preguntas sobre el Manual Organizacional de La Manada Feliz. ¿Qué te gustaría saber?");
+      }
+
+      function loadConversation(id) {
+        currentConversationId = id;
+        var conv = conversations.find(function(c) { return c.id === id; });
+        if (!conv) return;
+        clearChatBox();
+        if (conv.messages.length === 0) {
+          appendMessage("ai", "¡Hola! Estoy listo para responder tus preguntas sobre el Manual Organizacional de La Manada Feliz. ¿Qué te gustaría saber?");
+        } else {
+          conv.messages.forEach(function(msg) {
+            appendMessage(msg.role === "user" ? "user" : "ai", msg.content);
+          });
+        }
+        renderHistory();
+        document.getElementById("chatBox").scrollTop = 999999;
+      }
+
+      function updateConversationTitle(question) {
+        var conv = conversations.find(function(c) { return c.id === currentConversationId; });
+        if (conv && conv.title === "Nueva conversación") {
+          conv.title = question.substring(0, 40) + (question.length > 40 ? "..." : "");
+          saveConversations();
+          renderHistory();
+        }
+      }
+
+      function deleteConversation(id, event) {
+        event.stopPropagation();
+        if (!confirm("¿Borrar esta conversación?")) return;
+        conversations = conversations.filter(function(c) { return c.id !== id; });
+        if (currentConversationId === id) {
+          if (conversations.length === 0) {
+            startNewChat();
+          } else {
+            loadConversation(conversations[0].id);
+          }
+        }
+        saveConversations();
+        renderHistory();
+      }
+
+      function clearAllHistory() {
+        if (!confirm("¿Borrar TODAS las conversaciones? Esta acción no se puede deshacer.")) return;
+        conversations = [];
+        localStorage.removeItem("manada_conversations");
+        startNewChat();
+      }
+
+      // UI
+      function renderHistory() {
+        var list = document.getElementById("historyList");
+        list.innerHTML = "";
+        conversations.forEach(function(conv) {
+          var item = document.createElement("div");
+          item.className = "history-item" + (conv.id === currentConversationId ? " active" : "");
+          item.onclick = function() { loadConversation(conv.id); };
+          item.innerHTML =
+            '<div class="history-item-title">' + conv.title + '</div>' +
+            '<div class="history-item-date">' + conv.date + '</div>' +
+            '<button class="delete-icon" onclick="deleteConversation(' + conv.id + ', event)">🗑️</button>';
+          list.appendChild(item);
+        });
+      }
+
+      function clearChatBox() {
+        document.getElementById("chatBox").innerHTML = "";
+      }
+
+      function appendMessage(type, text) {
+        var chatBox = document.getElementById("chatBox");
+        var div = document.createElement("div");
+        div.className = "message " + (type === "user" ? "user-message" : "ai-message");
+        div.textContent = text;
+        chatBox.appendChild(div);
+        chatBox.scrollTop = chatBox.scrollHeight;
+      }
+
+      function handleKeyPress(event) {
+        if (event.key === "Enter") {
+          askQuestion();
+        }
+      }
+
+      // Base de conocimiento
+      var manualContext = "MANUAL ORGANIZACIONAL - LA MANADA FELIZ\n\n" +
+        "1. IDENTIDAD ORGANIZACIONAL\n\n" +
+        "Mision: En La Manada Feliz, nos dedicamos apasionadamente a brindar un refugio temporal amoroso y comprensivo para perros en situacion de calle y vulnerables.\n\n" +
+        "Vision: Visualizamos un futuro en el que cada perro vulnerable recibe amor, cuidado y rehabilitacion.\n\n" +
+        "Valores: Compasion, Integridad, Amor.\n\n" +
+        "2. ATENCION AL PUBLICO\n\nHorario: 11:00 AM a 4:00 PM, previa cita. Se atiende sin cita segun disponibilidad.\n\n" +
+        "3. RESCATES Y RECEPCION\n\nNo aceptamos perros de la calle traidos por terceros. Solo si un miembro del equipo encuentra un perro en peligro inmediato, procedemos con el rescate.\n\n" +
+        "4. CUARENTENA E INTEGRACION\n\nCuarentena: Minimo 3 semanas en zona separada con desparasitacion, vacuna contra garrapatas y pruebas de parvovirus, moquillo, ehrlichia, Lyme, giardia.\n\n" +
+        "Proceso: 1) Tratamiento Ehrlichia 28-30 dias, 2) Bravecto, 3) Desparasitacion completa, 4) Vacunacion 2 dosis, 5) Esterilizacion, 6) Integracion a villa.\n\n" +
+        "5. GESTION MEDICA\n\nClinica basica: desinfeccion y sutura, primeros auxilios, emergencias basicas. Protocolo anual: vacunacion, Bravecto cada 4 meses, desparasitacion periodica.\n\n" +
+        "6. LIMPIEZA\n\nDiariamente antes de 11 AM se lavan todas las villas con jabon, desinfectante y bactericida no toxico.\n\n" +
+        "7. DONACIONES\n\nPrograma Guardianes (mensual), donacion unica, transferencias directas. Se aceptan donaciones en dolares.\n\n" +
+        "8. SEGURIDAD\n\nPrioridad en seguridad de personas. No se han registrado perros agresivos con personas.\n\n" +
+        "9. EMERGENCIAS\n\nProtocolos para emergencias con animales, incendios, fauna silvestre y personal.\n\n" +
+        "10. RECURSOS HUMANOS\n\nInduccion de una semana. No hay horarios fijos, se requiere alta flexibilidad. La mayoria del personal vive en las instalaciones.\n\n" +
+        "11. MEDIO AMBIENTE\n\nPlan de reciclaje en desarrollo. Proyecto de biofertilizante con CICESE Ensenada (pausado).\n\n" +
+        "12. ESTRUCTURA LEGAL\n\nAsociacion Civil legalmente constituida. Pagamos impuestos por donativos.\n\n" +
+        "13. REDES SOCIALES\n\n90% gestionado por la directora. Enfoque en contenido positivo, evitando drama.";
+
+      // API Call
+      function askQuestion() {
+        var input = document.getElementById("questionInput");
+        var loading = document.getElementById("loading");
+        var sendButton = document.getElementById("sendButton");
+        var question = input.value.trim();
+
+        if (!question) return;
+
+        appendMessage("user", question);
+        input.value = "";
+        input.disabled = true;
+        sendButton.disabled = true;
+        loading.style.display = "block";
+
+        // Obtener historial ANTES de guardar (evita duplicado)
+        var conv = conversations.find(function(c) { return c.id === currentConversationId; });
+        var history = conv ? conv.messages.slice() : [];
+
+        // Guardar y actualizar titulo
+        saveMessage("user", question);
+        updateConversationTitle(question);
+
+        // Construir geminiContents
+        var geminiContents = [];
+        history.forEach(function(msg) {
+          var role = (msg.role === "assistant" || msg.role === "model") ? "model" : "user";
+          var last = geminiContents[geminiContents.length - 1];
+          if (last && last.role === role) {
+            last.parts[0].text += "\n" + msg.content;
+          } else {
+            geminiContents.push({ role: role, parts: [{ text: msg.content }] });
+          }
+        });
+        // Agregar pregunta actual
+        var lastItem = geminiContents[geminiContents.length - 1];
+        if (lastItem && lastItem.role === "user") {
+          lastItem.parts[0].text += "\n" + question;
+        } else {
+          geminiContents.push({ role: "user", parts: [{ text: question }] });
+        }
+
+        var systemPrompt = "Eres un asistente amigable y preciso que responde preguntas sobre La Manada Feliz, un santuario de perros en Mexico. Usa unicamente la informacion del manual organizacional proporcionado. Si la pregunta no esta cubierta en el manual, indicalo con amabilidad. Responde siempre en español.\n\n" + manualContext;
+
+        var body = JSON.stringify({
+          systemInstruction: { parts: [{ text: systemPrompt }] },
+          contents: geminiContents,
+          generationConfig: { temperature: 0.7, maxOutputTokens: 1024 }
+        });
+
+        fetch(GEMINI_URL, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: body
+        })
+        .then(function(response) {
+          return response.json().then(function(data) {
+            if (!response.ok) {
+              var errMsg = (data && data.error && data.error.message) ? data.error.message : ("Error " + response.status);
+              throw new Error(errMsg);
+            }
+            return data;
+          });
+        })
+        .then(function(data) {
+          var aiResponse = data.candidates && data.candidates[0] && data.candidates[0].content && data.candidates[0].content.parts && data.candidates[0].content.parts[0] && data.candidates[0].content.parts[0].text;
+          if (!aiResponse) throw new Error("Respuesta vacia de la API");
+          appendMessage("ai", aiResponse);
+          saveMessage("assistant", aiResponse);
+        })
+        .catch(function(error) {
+          console.error("Error Gemini:", error);
+          appendMessage("ai", "❌ " + error.message);
+        })
+        .finally(function() {
+          loading.style.display = "none";
+          input.disabled = false;
+          sendButton.disabled = false;
+          input.focus();
+        });
+      }
+
+      window.addEventListener("DOMContentLoaded", loadConversations);
+    </script>
+  </body>
+</html>
